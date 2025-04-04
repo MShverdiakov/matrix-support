@@ -1,63 +1,57 @@
 # Matrix Game Analyzer
 
-A Python application for analyzing matrix games, including finding maximin and minimax strategies, dominated strategies, and rationalization.
+Анализатор матричных игр с графическим интерфейсом. Позволяет анализировать матричные игры, находить максимин и минимакс стратегии, а также удалять доминируемые стратегии.
 
-## Features
+## Функциональность
 
-- Load and save game matrices in CSV and JSON formats
-- Find maximin and minimax strategies
-- Identify strictly and weakly dominated strategies
-- Rationalize game matrix by removing dominated strategies
-- Generate random game matrices for testing
-- GUI interface for easy interaction
+- Загрузка и сохранение матриц в форматах CSV и JSON
+- Нахождение максимин и минимакс стратегий
+- Удаление строго доминируемых стратегий
+- Удаление слабо доминируемых стратегий
+- Удаление нло стратегий
+- Визуальное выделение стратегий в матрице
+- Подробный вывод результатов анализа
 
-## Requirements
+## Требования
 
 - Python 3.8+
-- NumPy
 - PyQt6
+- NumPy
 
-## Installation
+## Установка
 
-1. Clone the repository:
+1. Клонируйте репозиторий:
 ```bash
-git clone https://github.com/yourusername/matrix_game_analizer.git
-cd matrix_game_analizer
+git clone https://github.com/yourusername/matrix_game_analyzer.git
 ```
 
-2. Create and activate a virtual environment:
-```bash
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-```
-
-3. Install dependencies:
+2. Установите зависимости:
 ```bash
 pip install -r requirements.txt
 ```
 
-## Usage
+## Использование
 
-Run the application:
+Запустите программу:
 ```bash
 python -m src.main
 ```
 
-### File Formats
+## Структура проекта
 
-#### CSV Format
 ```
-1,2,3
-2,4,1
-1,3,2
-```
-
-#### JSON Format
-```json
-{
-    "matrix": [[1,2,3], [2,4,1], [1,3,2]],
-    "shape": [3,3]
-}
+matrix_game_analyzer/
+├── src/
+│   ├── core/
+│   │   └── game_analyzer.py
+│   │   └── game_analyzer.py
+│   ├── gui/
+│   │   └── main_window.py
+│   └── main.py
+├── data/
+│   └── test_matrix.csv
+├── requirements.txt
+└── README.md
 ```
 
 ## License

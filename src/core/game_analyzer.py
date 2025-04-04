@@ -36,56 +36,106 @@ class GameAnalyzer:
         minimax_strategy = np.argmin(column_maxima)
         return minimax_value, minimax_strategy
 
-    def find_dominated_rows(self) -> Tuple[List[int], List[int]]:
-        """
-        Find all dominated row strategies.
+    def is_dominated_row(self, matrix, row1, row2):
+        """Проверяет, доминирует ли строка row1 строку row2"""
+        # Для строк (первый игрок) - большее значение лучше
+        # Строгая доминация: все элементы в row1 должны быть больше, чем в row2
+        # Слабая доминация: все элементы в row1 должны быть больше или равны, чем в row2, и хотя бы один строго больше
+        strictly_dominated = all(matrix[row1][j] > matrix[row2][j] for j in range(len(matrix[0])))
+        weakly_dominated = (all(matrix[row1][j] >= matrix[row2][j] for j in range(len(matrix[0]))) and
+                           any(matrix[row1][j] > matrix[row2][j] for j in range(len(matrix[0]))))
+        return strictly_dominated, weakly_dominated
+
+    def is_dominated_column(self, matrix, col1, col2):
+        """Проверяет, доминирует ли столбец col1 столбец col2"""
+        # Для столбцов (второй игрок) - меньшее значение лучше
+        # Строгая доминация: все элементы в col1 должны быть меньше, чем в col2
+        # Слабая доминация: все элементы в col1 должны быть меньше или равны, чем в col2, и хотя бы один строго меньше
+        strictly_dominated = all(matrix[i][col1] > matrix[i][col2] for i in range(len(matrix)))
+        weakly_dominated = (all(matrix[i][col1] >= matrix[i][col2] for i in range(len(matrix))) and
+                           any(matrix[i][col1] > matrix[i][col2] for i in range(len(matrix))))
+        return strictly_dominated, weakly_dominated
+
+    def find_dominated_rows(self, matrix):
+        """Находит доминируемые строки"""
+        rows = len(matrix)
+        strictly_dominated = []
+        weakly_dominated = []
         
-        Returns:
-            Tuple of (strictly dominated rows, weakly dominated rows)
-        """
-        strictly_dominated = set()
-        weakly_dominated = set()
-        
-        # For each row, check if it is dominated by any other row
-        for i in range(self.rows):
-            for j in range(self.rows):
+        for i in range(rows):
+            for j in range(rows):
                 if i != j:
-                    # Check if row i is strictly dominated by row j
-                    if all(self.matrix[i, k] < self.matrix[j, k] for k in range(self.cols)):
-                        strictly_dominated.add(i)
-                    
-                    # Check if row i is weakly dominated by row j
-                    if (all(self.matrix[i, k] <= self.matrix[j, k] for k in range(self.cols)) and
-                        any(self.matrix[i, k] < self.matrix[j, k] for k in range(self.cols))):
-                        weakly_dominated.add(i)
+                    strict, weak = self.is_dominated_row(matrix, j, i)
+                    if strict:
+                        strictly_dominated.append(i)
+                    elif weak:
+                        weakly_dominated.append(i)
         
-        return list(strictly_dominated), list(weakly_dominated)
+        return list(set(strictly_dominated)), list(set(weakly_dominated))
+
+    def find_dominated_columns(self, matrix):
+        """Находит доминируемые столбцы"""
+        cols = len(matrix[0])
+        strictly_dominated = []
+        weakly_dominated = []
         
-    def find_dominated_columns(self) -> Tuple[List[int], List[int]]:
-        """
-        Find all dominated column strategies.
-        
-        Returns:
-            Tuple of (strictly dominated columns, weakly dominated columns)
-        """
-        strictly_dominated = set()
-        weakly_dominated = set()
-        
-        # For each column, check if it is dominated by any other column
-        for i in range(self.cols):
-            for j in range(self.cols):
+        for i in range(cols):
+            for j in range(cols):
                 if i != j:
-                    # Check if column i is strictly dominated by column j
-                    if all(self.matrix[k, i] > self.matrix[k, j] for k in range(self.rows)):
-                        strictly_dominated.add(i)
-                    
-                    # Check if column i is weakly dominated by column j
-                    if (all(self.matrix[k, i] >= self.matrix[k, j] for k in range(self.rows)) and
-                        any(self.matrix[k, i] > self.matrix[k, j] for k in range(self.rows))):
-                        weakly_dominated.add(i)
+                    strict, weak = self.is_dominated_column(matrix, j, i)
+                    if strict:
+                        strictly_dominated.append(i)
+                    elif weak:
+                        weakly_dominated.append(i)
         
-        return list(strictly_dominated), list(weakly_dominated)
-    
+        return list(set(strictly_dominated)), list(set(weakly_dominated))
+
+    def remove_unmentioned_row(self, matrix):
+        """Удаляет строки, которые не содержат максимумов в столбцах"""
+        rows = len(matrix)
+        cols = len(matrix[0])
+
+        # Шаг 1: Найти максимумы в каждом столбце и сохранить номера строк
+        mentioned_rows = set()
+        for col in range(cols):
+            max_value = max(row[col] for row in matrix)  # Находим максимум в столбце
+            for row_index in range(rows):
+                if matrix[row_index][col] == max_value:
+                    mentioned_rows.add(row_index)  # Запоминаем строку, содержащую максимум
+
+        # Шаг 2: Найти все строки, которые не упоминались в максимумах
+        unmentioned_rows = [row_index for row_index in range(rows) if row_index not in mentioned_rows]
+
+        if not unmentioned_rows:
+            return matrix  # Если все строки были упомянуты, ничего не удаляем
+
+        # Удаляем все строки, которые не упоминались
+        new_matrix = [row for i, row in enumerate(matrix) if i not in unmentioned_rows]
+        return new_matrix
+
+    def remove_unmentioned_columns(self, matrix):
+        """Удаляет столбцы, которые не содержат максимумов в строках"""
+        rows = len(matrix)
+        cols = len(matrix[0])
+
+        # Шаг 1: Найти максимумы в каждой строке и сохранить номера столбцов
+        mentioned_cols = set()
+        for row in matrix:
+            max_value = max(row)  # Находим максимум в строке
+            for col_index in range(cols):
+                if row[col_index] == max_value:
+                    mentioned_cols.add(col_index)  # Запоминаем столбец, содержащий максимум
+
+        # Шаг 2: Найти все столбцы, которые не упоминались в максимумах
+        unmentioned_cols = [col_index for col_index in range(cols) if col_index not in mentioned_cols]
+
+        if not unmentioned_cols:
+            return matrix  # Если все столбцы были упомянуты, ничего не удаляем
+
+        # Удаляем все столбцы, которые не упоминались
+        new_matrix = [[row[col] for col in range(cols) if col not in unmentioned_cols] for row in matrix]
+        return new_matrix
+
     def find_best_response(self, opponent_strategy: np.ndarray) -> Tuple[int, float]:
         """
         Find the best response to a mixed strategy of the opponent.
@@ -108,8 +158,8 @@ class GameAnalyzer:
         Returns:
             New matrix with dominated strategies removed
         """
-        strictly_dominated_rows, _ = self.find_dominated_rows()
-        strictly_dominated_cols, _ = self.find_dominated_columns()
+        strictly_dominated_rows, _ = self.find_dominated_rows(self.matrix)
+        strictly_dominated_cols, _ = self.find_dominated_columns(self.matrix)
         
         if not strictly_dominated_rows and not strictly_dominated_cols:
             return self.matrix
