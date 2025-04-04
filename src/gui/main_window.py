@@ -42,6 +42,14 @@ class MainWindow(QMainWindow):
         top_panel.addLayout(size_layout)
         top_panel.addStretch()
         
+        # Кнопка генерации случайной матрицы
+        random_button = QPushButton("Сгенерировать")
+        random_button.clicked.connect(self.generate_random_matrix)
+        top_panel.addWidget(random_button)
+        
+        # Добавляем отступ
+        top_panel.addSpacing(50)
+        
         # Кнопки загрузки и сохранения
         load_button = QPushButton("Загрузить")
         load_button.clicked.connect(self.load_matrix)
@@ -330,4 +338,16 @@ class MainWindow(QMainWindow):
                 self.analyzer.save_to_file(filename, format)
                 QMessageBox.information(self, "Успех", "Матрица успешно сохранена!")
             except Exception as e:
-                QMessageBox.critical(self, "Ошибка", f"Не удалось сохранить матрицу: {str(e)}") 
+                QMessageBox.critical(self, "Ошибка", f"Не удалось сохранить матрицу: {str(e)}")
+    
+    def generate_random_matrix(self):
+        """Генерирует случайную матрицу."""
+        try:
+            rows = self.rows_spin.value()
+            cols = self.cols_spin.value()
+            # Генерируем случайные числа и округляем до 2 знаков после запятой
+            matrix = np.round(np.random.uniform(-10, 10, size=(rows, cols)), 2)
+            self.set_matrix_to_table(matrix)
+            self.results_text.setPlainText("Случайная матрица успешно сгенерирована.")
+        except Exception as e:
+            QMessageBox.critical(self, "Ошибка", f"Не удалось сгенерировать случайную матрицу: {str(e)}") 

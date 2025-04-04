@@ -22,7 +22,7 @@
 
 1. Клонируйте репозиторий:
 ```bash
-git clone https://github.com/yourusername/matrix_game_analyzer.git
+git clone https://github.com/MShverdiakov/matrix_game_analyzer.git
 ```
 
 2. Установите зависимости:
