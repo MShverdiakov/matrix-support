@@ -85,9 +85,9 @@ class MainWindow(QMainWindow):
         remove_weak_button.clicked.connect(self.remove_weakly_dominated)
         analysis_buttons.addWidget(remove_weak_button)
         
-        remove_unmentioned_button = QPushButton("Удалить нло стратегии")
-        remove_unmentioned_button.clicked.connect(self.remove_unmentioned_strategies)
-        analysis_buttons.addWidget(remove_unmentioned_button)
+        remove_nlo_button = QPushButton("Удалить нло стратегии")
+        remove_nlo_button.clicked.connect(self.remove_nlo_strategies)
+        analysis_buttons.addWidget(remove_nlo_button)
         
         main_layout.addLayout(analysis_buttons)
         
@@ -188,9 +188,8 @@ class MainWindow(QMainWindow):
         
         # Форматируем результаты
         results = "Анализ максимин стратегий:\n\n"
-        results += f"Значение максимина: {maximin_value}\n"
-        results += f"Максимин стратегии: {[i+1 for i in maximin_rows]}\n"
-        results += f"Значения в строках: {[row_minima[i] for i in maximin_rows]}\n"
+        results += f"Значение максимина: {float(maximin_value)}\n"
+        results += f"Максимин стратегии: {[int(i+1) for i in maximin_rows]}\n"
         
         self.results_text.setPlainText(results)
     
@@ -211,15 +210,15 @@ class MainWindow(QMainWindow):
         
         # Форматируем результаты
         results = "Анализ минимакс стратегий:\n\n"
-        results += f"Значение минимакса: {minimax_value}\n"
-        results += f"Минимакс стратегии: {[i+1 for i in minimax_cols]}\n"
-        results += f"Значения в столбцах: {[column_maxima[i] for i in minimax_cols]}\n"
+        results += f"Значение минимакса: {float(minimax_value)}\n"
+        results += f"Минимакс стратегии: {[int(i+1) for i in minimax_cols]}\n"
         
         self.results_text.setPlainText(results)
     
     def remove_strictly_dominated(self):
         """Удаляет строго доминируемые стратегии."""
         matrix = self.get_matrix_from_table()
+        original_matrix = matrix.copy()  # Сохраняем копию исходной матрицы
         self.analyzer = GameAnalyzer(matrix)
         
         # Находим доминируемые стратегии
@@ -230,24 +229,39 @@ class MainWindow(QMainWindow):
             self.results_text.setPlainText("Нет строго доминируемых стратегий для удаления.")
             return
         
+        # Форматируем исходную матрицу
+        results = "Исходная матрица:\n"
+        for row in original_matrix:
+            results += " ".join(f"{x:6.2f}" for x in row) + "\n"
+        results += "\n"
+        
         # Удаляем доминируемые стратегии
         matrix = self.analyzer.rationalize()
         
         # Обновляем таблицу
         self.set_matrix_to_table(matrix)
         
-        # Форматируем результаты
-        results = "Удаление строго доминируемых стратегий:\n\n"
+        # Добавляем информацию об удаленных стратегиях
+        results += "Удаление строго доминируемых стратегий:\n"
         if strictly_dominated_rows:
             results += f"Удалены строго доминируемые строки: {[i+1 for i in strictly_dominated_rows]}\n"
+            for row_idx in strictly_dominated_rows:
+                results += f"Строка {row_idx+1}: {' '.join(f'{x:6.2f}' for x in original_matrix[row_idx])}\n"
         if strictly_dominated_cols:
-            results += f"Удалены строго доминируемые столбцы: {[i+1 for i in strictly_dominated_cols]}\n"
+            results += f"\nУдалены строго доминируемые столбцы: {[i+1 for i in strictly_dominated_cols]}\n"
+            for col_idx in strictly_dominated_cols:
+                results += f"Столбец {col_idx+1}: {' '.join(f'{x:6.2f}' for x in original_matrix[:, col_idx])}\n"
+        
+        results += "\nРезультирующая матрица:\n"
+        for row in matrix:
+            results += " ".join(f"{x:6.2f}" for x in row) + "\n"
         
         self.results_text.setPlainText(results)
     
     def remove_weakly_dominated(self):
         """Удаляет слабо и строго доминируемые стратегии."""
         matrix = self.get_matrix_from_table()
+        original_matrix = matrix.copy()  # Сохраняем копию исходной матрицы
         self.analyzer = GameAnalyzer(matrix)
         
         # Находим все доминируемые стратегии (и строго, и слабо)
@@ -261,6 +275,12 @@ class MainWindow(QMainWindow):
         if not all_dominated_rows and not all_dominated_cols:
             self.results_text.setPlainText("Нет доминируемых стратегий для удаления.")
             return
+        
+        # Форматируем исходную матрицу
+        results = "Исходная матрица:\n"
+        for row in original_matrix:
+            results += " ".join(f"{x:6.2f}" for x in row) + "\n"
+        results += "\n"
         
         # Создаем маски для удаления
         row_mask = np.ones(len(matrix), dtype=bool)
@@ -277,27 +297,54 @@ class MainWindow(QMainWindow):
         # Обновляем таблицу
         self.set_matrix_to_table(new_matrix)
         
-        # Форматируем результаты
-        results = "Удаление доминируемых стратегий:\n\n"
+        # Добавляем информацию об удаленных стратегиях
+        results += "Удаление доминируемых стратегий:\n"
         if strictly_dominated_rows:
             results += f"Удалены строго доминируемые строки: {[i+1 for i in strictly_dominated_rows]}\n"
+            for row_idx in strictly_dominated_rows:
+                results += f"Строка {row_idx+1}: {' '.join(f'{x:6.2f}' for x in original_matrix[row_idx])}\n"
         if strictly_dominated_cols:
-            results += f"Удалены строго доминируемые столбцы: {[i+1 for i in strictly_dominated_cols]}\n"
+            results += f"\nУдалены строго доминируемые столбцы: {[i+1 for i in strictly_dominated_cols]}\n"
+            for col_idx in strictly_dominated_cols:
+                results += f"Столбец {col_idx+1}: {' '.join(f'{x:6.2f}' for x in original_matrix[:, col_idx])}\n"
         if weakly_dominated_rows:
-            results += f"Удалены слабо доминируемые строки: {[i+1 for i in weakly_dominated_rows]}\n"
+            results += f"\nУдалены слабо доминируемые строки: {[i+1 for i in weakly_dominated_rows]}\n"
+            for row_idx in weakly_dominated_rows:
+                results += f"Строка {row_idx+1}: {' '.join(f'{x:6.2f}' for x in original_matrix[row_idx])}\n"
         if weakly_dominated_cols:
-            results += f"Удалены слабо доминируемые столбцы: {[i+1 for i in weakly_dominated_cols]}\n"
+            results += f"\nУдалены слабо доминируемые столбцы: {[i+1 for i in weakly_dominated_cols]}\n"
+            for col_idx in weakly_dominated_cols:
+                results += f"Столбец {col_idx+1}: {' '.join(f'{x:6.2f}' for x in original_matrix[:, col_idx])}\n"
+        
+        results += "\nРезультирующая матрица:\n"
+        for row in new_matrix:
+            results += " ".join(f"{x:6.2f}" for x in row) + "\n"
         
         self.results_text.setPlainText(results)
     
-    def remove_unmentioned_strategies(self):
+    def remove_nlo_strategies(self):
         """Удаляет нло стратегии."""
         matrix = self.get_matrix_from_table()
+        original_matrix = matrix.copy()  # Сохраняем копию исходной матрицы
         self.analyzer = GameAnalyzer(matrix)
         
+        # Находим нло стратегии
+        unmentioned_rows = self.analyzer.find_nlo_rows(matrix)
+        unmentioned_cols = self.analyzer.find_nlo_columns(matrix)
+        
+        if not unmentioned_rows and not unmentioned_cols:
+            self.results_text.setPlainText("Нет нло стратегий для удаления.")
+            return
+        
+        # Форматируем исходную матрицу
+        results = "Исходная матрица:\n"
+        for row in original_matrix:
+            results += " ".join(f"{x:6.2f}" for x in row) + "\n"
+        results += "\n"
+        
         # Удаляем нло стратегии
-        matrix = self.analyzer.remove_unmentioned_row(matrix)
-        matrix = self.analyzer.remove_unmentioned_columns(matrix)
+        matrix = self.analyzer.remove_nlo_row(matrix)
+        matrix = self.analyzer.remove_nlo_columns(matrix)
         
         # Преобразуем список в numpy array
         matrix = np.array(matrix)
@@ -305,9 +352,20 @@ class MainWindow(QMainWindow):
         # Обновляем таблицу
         self.set_matrix_to_table(matrix)
         
-        # Форматируем результаты
-        results = "Удаление нло стратегий:\n\n"
-        results += "Удалены стратегии, которые не содержат максимумов в соответствующих строках/столбцах.\n"
+        # Добавляем информацию об удаленных стратегиях
+        results += "Удаление нло стратегий:\n"
+        if unmentioned_rows:
+            results += f"Удалены нло строки: {[i+1 for i in unmentioned_rows]}\n"
+            for row_idx in unmentioned_rows:
+                results += f"Строка {row_idx+1}: {' '.join(f'{x:6.2f}' for x in original_matrix[row_idx])}\n"
+        if unmentioned_cols:
+            results += f"\nУдалены нло столбцы: {[i+1 for i in unmentioned_cols]}\n"
+            for col_idx in unmentioned_cols:
+                results += f"Столбец {col_idx+1}: {' '.join(f'{x:6.2f}' for x in original_matrix[:, col_idx])}\n"
+        
+        results += "\nРезультирующая матрица:\n"
+        for row in matrix:
+            results += " ".join(f"{x:6.2f}" for x in row) + "\n"
         
         self.results_text.setPlainText(results)
     

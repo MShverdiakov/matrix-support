@@ -90,51 +90,45 @@ class GameAnalyzer:
         
         return list(set(strictly_dominated)), list(set(weakly_dominated))
 
-    def remove_unmentioned_row(self, matrix):
-        """Удаляет строки, которые не содержат максимумов в столбцах"""
-        rows = len(matrix)
-        cols = len(matrix[0])
-
-        # Шаг 1: Найти максимумы в каждом столбце и сохранить номера строк
-        mentioned_rows = set()
-        for col in range(cols):
-            max_value = max(row[col] for row in matrix)  # Находим максимум в столбце
-            for row_index in range(rows):
-                if matrix[row_index][col] == max_value:
-                    mentioned_rows.add(row_index)  # Запоминаем строку, содержащую максимум
-
-        # Шаг 2: Найти все строки, которые не упоминались в максимумах
-        unmentioned_rows = [row_index for row_index in range(rows) if row_index not in mentioned_rows]
-
-        if not unmentioned_rows:
-            return matrix  # Если все строки были упомянуты, ничего не удаляем
-
-        # Удаляем все строки, которые не упоминались
-        new_matrix = [row for i, row in enumerate(matrix) if i not in unmentioned_rows]
-        return new_matrix
-
-    def remove_unmentioned_columns(self, matrix):
-        """Удаляет столбцы, которые не содержат максимумов в строках"""
-        rows = len(matrix)
-        cols = len(matrix[0])
-
-        # Шаг 1: Найти максимумы в каждой строке и сохранить номера столбцов
-        mentioned_cols = set()
-        for row in matrix:
-            max_value = max(row)  # Находим максимум в строке
-            for col_index in range(cols):
-                if row[col_index] == max_value:
-                    mentioned_cols.add(col_index)  # Запоминаем столбец, содержащий максимум
-
-        # Шаг 2: Найти все столбцы, которые не упоминались в максимумах
-        unmentioned_cols = [col_index for col_index in range(cols) if col_index not in mentioned_cols]
-
-        if not unmentioned_cols:
-            return matrix  # Если все столбцы были упомянуты, ничего не удаляем
-
-        # Удаляем все столбцы, которые не упоминались
-        new_matrix = [[row[col] for col in range(cols) if col not in unmentioned_cols] for row in matrix]
-        return new_matrix
+    def find_nlo_rows(self, matrix):
+        """Находит нло строки в матрице."""
+        rows = []
+        for i in range(len(matrix)):
+            if not any(matrix[i] == np.max(matrix, axis=0)):
+                rows.append(i)
+        return rows
+    
+    def find_nlo_columns(self, matrix):
+        """Находит нло столбцы в матрице."""
+        cols = []
+        for j in range(len(matrix[0])):
+            if not any(matrix[:, j] == np.min(matrix, axis=1)):
+                cols.append(j)
+        return cols
+    
+    def remove_nlo_row(self, matrix):
+        """Удаляет нло строки из матрицы."""
+        rows = self.find_nlo_rows(matrix)
+        if not rows:
+            return matrix
+        
+        # Создаем маску для строк, которые нужно оставить
+        mask = np.ones(len(matrix), dtype=bool)
+        mask[rows] = False
+        
+        return matrix[mask]
+    
+    def remove_nlo_columns(self, matrix):
+        """Удаляет нло столбцы из матрицы."""
+        cols = self.find_nlo_columns(matrix)
+        if not cols:
+            return matrix
+        
+        # Создаем маску для столбцов, которые нужно оставить
+        mask = np.ones(len(matrix[0]), dtype=bool)
+        mask[cols] = False
+        
+        return matrix[:, mask]
 
     def find_best_response(self, opponent_strategy: np.ndarray) -> Tuple[int, float]:
         """
