@@ -241,18 +241,8 @@ class MainWindow(QMainWindow):
         # Обновляем таблицу
         self.set_matrix_to_table(matrix)
         
-        # Добавляем информацию об удаленных стратегиях
-        results += "Удаление строго доминируемых стратегий:\n"
-        if strictly_dominated_rows:
-            results += f"Удалены строго доминируемые строки: {[i+1 for i in strictly_dominated_rows]}\n"
-            for row_idx in strictly_dominated_rows:
-                results += f"Строка {row_idx+1}: {' '.join(f'{x:6.2f}' for x in original_matrix[row_idx])}\n"
-        if strictly_dominated_cols:
-            results += f"\nУдалены строго доминируемые столбцы: {[i+1 for i in strictly_dominated_cols]}\n"
-            for col_idx in strictly_dominated_cols:
-                results += f"Столбец {col_idx+1}: {' '.join(f'{x:6.2f}' for x in original_matrix[:, col_idx])}\n"
-        
-        results += "\nРезультирующая матрица:\n"
+        # Добавляем результирующую матрицу
+        results += "Результирующая матрица:\n"
         for row in matrix:
             results += " ".join(f"{x:6.2f}" for x in row) + "\n"
         
@@ -297,26 +287,8 @@ class MainWindow(QMainWindow):
         # Обновляем таблицу
         self.set_matrix_to_table(new_matrix)
         
-        # Добавляем информацию об удаленных стратегиях
-        results += "Удаление доминируемых стратегий:\n"
-        if strictly_dominated_rows:
-            results += f"Удалены строго доминируемые строки: {[i+1 for i in strictly_dominated_rows]}\n"
-            for row_idx in strictly_dominated_rows:
-                results += f"Строка {row_idx+1}: {' '.join(f'{x:6.2f}' for x in original_matrix[row_idx])}\n"
-        if strictly_dominated_cols:
-            results += f"\nУдалены строго доминируемые столбцы: {[i+1 for i in strictly_dominated_cols]}\n"
-            for col_idx in strictly_dominated_cols:
-                results += f"Столбец {col_idx+1}: {' '.join(f'{x:6.2f}' for x in original_matrix[:, col_idx])}\n"
-        if weakly_dominated_rows:
-            results += f"\nУдалены слабо доминируемые строки: {[i+1 for i in weakly_dominated_rows]}\n"
-            for row_idx in weakly_dominated_rows:
-                results += f"Строка {row_idx+1}: {' '.join(f'{x:6.2f}' for x in original_matrix[row_idx])}\n"
-        if weakly_dominated_cols:
-            results += f"\nУдалены слабо доминируемые столбцы: {[i+1 for i in weakly_dominated_cols]}\n"
-            for col_idx in weakly_dominated_cols:
-                results += f"Столбец {col_idx+1}: {' '.join(f'{x:6.2f}' for x in original_matrix[:, col_idx])}\n"
-        
-        results += "\nРезультирующая матрица:\n"
+        # Добавляем результирующую матрицу
+        results += "Результирующая матрица:\n"
         for row in new_matrix:
             results += " ".join(f"{x:6.2f}" for x in row) + "\n"
         
@@ -352,18 +324,8 @@ class MainWindow(QMainWindow):
         # Обновляем таблицу
         self.set_matrix_to_table(matrix)
         
-        # Добавляем информацию об удаленных стратегиях
-        results += "Удаление нло стратегий:\n"
-        if unmentioned_rows:
-            results += f"Удалены нло строки: {[i+1 for i in unmentioned_rows]}\n"
-            for row_idx in unmentioned_rows:
-                results += f"Строка {row_idx+1}: {' '.join(f'{x:6.2f}' for x in original_matrix[row_idx])}\n"
-        if unmentioned_cols:
-            results += f"\nУдалены нло столбцы: {[i+1 for i in unmentioned_cols]}\n"
-            for col_idx in unmentioned_cols:
-                results += f"Столбец {col_idx+1}: {' '.join(f'{x:6.2f}' for x in original_matrix[:, col_idx])}\n"
-        
-        results += "\nРезультирующая матрица:\n"
+        # Добавляем результирующую матрицу
+        results += "Результирующая матрица:\n"
         for row in matrix:
             results += " ".join(f"{x:6.2f}" for x in row) + "\n"
         
