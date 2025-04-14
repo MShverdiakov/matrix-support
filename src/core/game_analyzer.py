@@ -94,7 +94,13 @@ class GameAnalyzer:
         """Находит нло строки в матрице."""
         rows = []
         for i in range(len(matrix)):
-            if not any(matrix[i] == np.max(matrix, axis=0)):
+            # Проверяем, является ли строка оптимальной хотя бы в одном столбце
+            is_optimal = False
+            for j in range(len(matrix[0])):
+                if matrix[i, j] == np.max(matrix[:, j]):
+                    is_optimal = True
+                    break
+            if not is_optimal:
                 rows.append(i)
         return rows
     
@@ -102,7 +108,13 @@ class GameAnalyzer:
         """Находит нло столбцы в матрице."""
         cols = []
         for j in range(len(matrix[0])):
-            if not any(matrix[:, j] == np.min(matrix, axis=1)):
+            # Проверяем, является ли столбец оптимальным хотя бы в одной строке
+            is_optimal = False
+            for i in range(len(matrix)):
+                if matrix[i, j] == np.min(matrix[i, :]):
+                    is_optimal = True
+                    break
+            if not is_optimal:
                 cols.append(j)
         return cols
     

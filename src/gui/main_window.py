@@ -25,7 +25,7 @@ class MainWindow(QMainWindow):
         size_layout = QHBoxLayout()
         size_layout.addWidget(QLabel("Строк:"))
         self.rows_spin = QSpinBox()
-        self.rows_spin.setRange(1, 10)
+        self.rows_spin.setRange(1, 50)
         self.rows_spin.setValue(2)
         self.rows_spin.setFixedWidth(60)
         self.rows_spin.valueChanged.connect(self.update_matrix_size)
@@ -33,7 +33,7 @@ class MainWindow(QMainWindow):
         
         size_layout.addWidget(QLabel("Столбцов:"))
         self.cols_spin = QSpinBox()
-        self.cols_spin.setRange(1, 10)
+        self.cols_spin.setRange(1, 50)
         self.cols_spin.setValue(2)
         self.cols_spin.setFixedWidth(60)
         self.cols_spin.valueChanged.connect(self.update_matrix_size)
@@ -242,9 +242,11 @@ class MainWindow(QMainWindow):
         self.set_matrix_to_table(matrix)
         
         # Добавляем результирующую матрицу
+        # Добавляем результирующую матрицу
         results += "Результирующая матрица:\n"
-        for row in matrix:
-            results += " ".join(f"{x:6.2f}" for x in row) + "\n"
+        for i, row in enumerate(original_matrix):
+            results += " ".join(f"{x:6.2f}" if (i, j) in [(k, l) for k, row2 in enumerate(matrix) for l, x2 in enumerate(row2)] else "##.##" for j, x in enumerate(row)) + "\n"
+        
         
         self.results_text.setPlainText(results)
     
@@ -291,7 +293,7 @@ class MainWindow(QMainWindow):
         results += "Результирующая матрица:\n"
         for row in new_matrix:
             results += " ".join(f"{x:6.2f}" for x in row) + "\n"
-        
+            
         self.results_text.setPlainText(results)
     
     def remove_nlo_strategies(self):
@@ -301,10 +303,10 @@ class MainWindow(QMainWindow):
         self.analyzer = GameAnalyzer(matrix)
         
         # Находим нло стратегии
-        unmentioned_rows = self.analyzer.find_nlo_rows(matrix)
-        unmentioned_cols = self.analyzer.find_nlo_columns(matrix)
+        nlo_rows = self.analyzer.find_nlo_rows(matrix)
+        nlo_cols = self.analyzer.find_nlo_columns(matrix)
         
-        if not unmentioned_rows and not unmentioned_cols:
+        if not nlo_rows and not nlo_cols:
             self.results_text.setPlainText("Нет нло стратегий для удаления.")
             return
         
@@ -326,8 +328,8 @@ class MainWindow(QMainWindow):
         
         # Добавляем результирующую матрицу
         results += "Результирующая матрица:\n"
-        for row in matrix:
-            results += " ".join(f"{x:6.2f}" for x in row) + "\n"
+        for i, row in enumerate(original_matrix):
+            results += " ".join(f"{x:6.2f}" if (i, j) in [(k, l) for k, row2 in enumerate(matrix) for l, x2 in enumerate(row2)] else "##.##" for j, x in enumerate(row)) + "\n"
         
         self.results_text.setPlainText(results)
     
